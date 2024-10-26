@@ -8,7 +8,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'your_secret_key'
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
-CORS(app)
+
+# 配置CORS，允许前端访问后端并携带凭证
+CORS(app, supports_credentials=True, origins=['http://localhost:8080'])
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -37,7 +39,7 @@ def login():
     user = User.query.filter_by(username=username).first()
     if user and bcrypt.check_password_hash(user.password, password):
         session['user_id'] = user.id
-        return jsonify({'message': 'Logged in successfully'}), 200
+        return jsonify({'message': 'Logged in successfully','user_id':session['user_id']}), 200
     return jsonify({'message': 'Invalid credentials'}), 401
 
 # 注销API
@@ -69,6 +71,20 @@ def record_poop():
     user.poops += poop_count
     db.session.commit()
     return jsonify({'message': f'{poop_count} poops recorded!'}), 200
+
+# 首页获取用户信息和poop数API
+@app.route('/user_info', methods=['GET'])
+def get_user_info():
+    if 'user_id' not in session:
+        return jsonify({'message': 'Unauthorized'}), 401
+
+    user = User.query.get(session['user_id'])
+    if user:
+        return jsonify({
+            'username': user.username,
+            'poop_count': user.poops
+        }), 200
+    return jsonify({'message': 'User not found'}), 404
 
 if __name__ == '__main__':
     with app.app_context():

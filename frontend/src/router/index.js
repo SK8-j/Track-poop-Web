@@ -1,20 +1,42 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import HomePage from '../components/HomePage.vue';
+// import Login from '../views/Login.vue';
+// import Register from '../views/Register.vue';
+import HomePage from '../views/HomePage.vue';
+import LoginRegisterContainer from '../views/LoginRegisterContainer.vue';
 
-// 定义路由规则
 const routes = [
   {
     path: '/',
     name: 'Home',
     component: HomePage,
   },
-  // 你可以根据需要添加其他路由
+  {
+    path: '/login',
+    name: 'Login',
+    component: LoginRegisterContainer,
+    meta: { requiresAuth: false }, // 不需要登录
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: LoginRegisterContainer,
+    meta: { requiresAuth: false }, // 不需要登录
+  },
 ];
 
-// 创建路由实例
 const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes
 });
 
 export default router;
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = !!localStorage.getItem('user_id');
+  if (to.name !== 'Login' && to.name !== 'Register' && !isAuthenticated) {
+    next({ name: 'Login' });
+  } else {
+    next();
+  }
+});
+
+
