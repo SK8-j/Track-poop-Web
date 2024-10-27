@@ -47,6 +47,7 @@
   <script>
   import axios from 'axios';
   import { showMessage } from '../utils/message'; // 导入自定义的消息方法
+  import { useRouter } from 'vue-router';
 
   export default {
     name: 'LoginRegisterContainer',
@@ -63,6 +64,10 @@
         isFlipped: false
       };
     },
+    setup() {
+      const router = useRouter();
+      return { router };
+    },
     mounted() {
       this.checkRoute();
     },
@@ -76,11 +81,12 @@
       try {
         const response = await axios.post('http://localhost:5000/login', this.loginForm, {
           withCredentials: true,
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          // headers: {
+          //   'Content-Type': 'application/json'
+          // }
         });
         showMessage(response.data.message+'，'+response.data.username, 'success');
+        console.log(1);
         this.$router.push('/');
       } catch (error) {
         console.error('Login error:', error);
@@ -95,11 +101,12 @@
       try {
         const response = await axios.post('http://localhost:5000/register', this.registerForm, {
           withCredentials: true,
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          // headers: {
+          //   'Content-Type': 'application/json'
+          // }
         });
         showMessage(response.data.message, 'success');
+        console.log(1);
         this.$router.push('/login');
       } catch (error) {
         console.error('Register error:', error);

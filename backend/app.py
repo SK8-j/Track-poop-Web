@@ -40,7 +40,7 @@ def login():
     user = User.query.filter_by(username=username).first()
     if user and bcrypt.check_password_hash(user.password, password):
         session['user_id'] = user.id
-        return jsonify({'message': '欢迎回来','username':username}), 200
+        return jsonify({'message': '欢迎回来','username':username,'user_id':user.id}), 200
     return jsonify({'message': 'Invalid credentials'}), 401
 
 # 注销API
