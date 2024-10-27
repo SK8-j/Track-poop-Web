@@ -1,6 +1,7 @@
 <template>
   <div class="login-register-page">
     <div class="card-container" :class="{ flipped: isFlipped }">
+      <!-- Login Card -->
       <div class="login-card">
         <div class="waimiancard">
           <el-card class="form-card" shadow="hover">
@@ -21,39 +22,46 @@
         </div>
       </div>
 
+      <!-- Register Card -->
       <div class="register-card">
         <div class="waimiancard">
           <el-card class="form-card" shadow="hover">
             <h2>注册</h2>
             <el-form :model="registerForm" @submit.prevent="handleRegister">
-              <el-form-item>
-                <el-input v-model="registerForm.username" placeholder="用户名"></el-input>
+              <el-form-item label="用户名">
+                <el-input 
+                  v-model="registerForm.username" 
+                  clearable 
+                  placeholder="请输入用户名" >
+                </el-input>
               </el-form-item>
-              <el-form-item>
+              <el-form-item label="密码">
                 <el-input
                   type="password"
                   v-model="registerForm.password"
-                  placeholder="密码"
-                  @input="validatePassword"
-                  suffix-icon="passwordValidationIcon"
+                  clearable
+                  placeholder="请输入密码"
+                  show-password
                 ></el-input>
               </el-form-item>
-              <el-form-item>
-                <div class="validation-icons">
-                  <span :class="validationIconClass.uppercase">包含大写字母</span>
-                  <span :class="validationIconClass.lowercase">包含小写字母</span>
-                  <span :class="validationIconClass.number">包含数字</span>
-                  <span :class="validationIconClass.special">包含特殊字符</span>
-                  <span :class="validationIconClass.length">至少8位</span>
-                </div>
+              <el-form-item label="初始💩数量" prop="field105">
+                <el-slider :max='30' :step='1' v-model="registerForm.poop_count"></el-slider>
               </el-form-item>
+                
+              <!-- Password Strength Indicator -->
               <el-form-item>
                 <div class="password-strength">
                   密码强度：<span>{{ passwordStrengthEmoji }}</span>
+                  <span style="margin-left: 7%; ">😎/😊/😡?</span>
                 </div>
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" @click="handleRegister">注册</el-button>
+                <el-button 
+                  type="primary" 
+                  @click="handleRegister" 
+                  :disabled="isRegisterDisabled">
+                  注册
+                </el-button>
                 <el-button type="text" @click="flipToLogin">已有账号？登录</el-button>
               </el-form-item>
             </el-form>
@@ -79,9 +87,10 @@ export default {
       },
       registerForm: {
         username: '',
-        password: ''
+        password: '',
+        poop_count: 0
       },
-      isFlipped: false,
+      isFlipped: true,
       validationStatus: {
         uppercase: false,
         lowercase: false,
@@ -92,29 +101,17 @@ export default {
     };
   },
   computed: {
-    passwordValidationIcon() {
-      return this.isPasswordValid ? 'el-icon-check' : 'el-icon-close';
-    },
-    isPasswordValid() {
-      return this.validationStatus.uppercase && this.validationStatus.lowercase &&
-             this.validationStatus.number && this.validationStatus.special &&
-             this.validationStatus.length;
-    },
-    validationIconClass() {
-      return {
-        uppercase: this.validationStatus.uppercase ? 'valid' : 'invalid',
-        lowercase: this.validationStatus.lowercase ? 'valid' : 'invalid',
-        number: this.validationStatus.number ? 'valid' : 'invalid',
-        special: this.validationStatus.special ? 'valid' : 'invalid',
-        length: this.validationStatus.length ? 'valid' : 'invalid',
-      };
-    },
-    passwordStrength() {
-      let strength = Object.values(this.validationStatus).filter(Boolean).length;
-      return strength;
-    },
+    // Compute the password strength emoji based on validation status
     passwordStrengthEmoji() {
-      return '💩'.repeat(this.passwordStrength);
+      const count = Object.values(this.validationStatus).filter(v => v).length;
+      if (count >= 5) return '😎'; // Strong
+      if (count >= 3) return '😊'; // Medium
+      return '😡'; // Weak
+    },
+    // Determine if the Register button should be disabled
+    isRegisterDisabled() {
+      // Disable if password strength is Weak
+      return this.passwordStrengthEmoji === '😡';
     }
   },
   setup() {
@@ -125,11 +122,17 @@ export default {
     this.checkRoute();
   },
   watch: {
+    // Watch for changes in the route to flip cards accordingly
     $route() {
       this.checkRoute();
+    },
+    // Watch the password field to validate in real-time
+    'registerForm.password': function() {
+      this.validatePassword();
     }
   },
   methods: {
+    // Validate the password and update validationStatus
     validatePassword() {
       const password = this.registerForm.password;
       this.validationStatus = {
@@ -140,6 +143,7 @@ export default {
         length: password.length >= 8
       };
     },
+    // Handle user login
     async handleLogin() {
       try {
         const response = await axios.post('http://localhost:5000/login', this.loginForm, {
@@ -147,14 +151,14 @@ export default {
         });
         const userId = response.data.user_id; 
         if (userId) {
-          showMessage(response.data.message + '，' + response.data.username, 'success');
+          showMessage(`${response.data.message}，${response.data.username}`, 'success');
           localStorage.setItem('user_id', userId);
           this.router.push('/home');
         } else {
-          showMessage('Login failed: user ID not received.');
+          showMessage('登录失败：未收到用户ID。');
         }
       } catch (error) {
-        console.error('Login error:', error);
+        console.error('登录错误:', error);
         if (error.response && error.response.data && error.response.data.message) {
           showMessage(error.response.data.message);
         } else {
@@ -162,17 +166,25 @@ export default {
         }
       }
     },
+    // Handle user registration
     async handleRegister() {
+      // Ensure password meets at least Medium strength before proceeding
+      if (this.isRegisterDisabled) {
+        showMessage('密码强度不足，请增强密码后再试。', 'warning');
+        return;
+      }
+
       try {
         const response = await axios.post('http://localhost:5000/register', this.registerForm, {
           withCredentials: true
         });
         showMessage(response.data.message, 'success');
+        // Automatically log in the user after successful registration
         this.loginForm.username = this.registerForm.username;
         this.loginForm.password = this.registerForm.password;
         await this.handleLogin();
       } catch (error) {
-        console.error('Register error:', error);
+        console.error('注册错误:', error);
         if (error.response && error.response.data && error.response.data.message) {
           showMessage(error.response.data.message);
         } else {
@@ -180,36 +192,50 @@ export default {
         }
       }
     },
+    // Flip to the Register card
     flipToRegister() {
       this.isFlipped = true;
     },
+    // Flip to the Login card
     flipToLogin() {
       this.isFlipped = false;
     },
+    // Check the current route to determine if the Register card should be shown
     checkRoute() {
-      if (this.$route.path === '/auth' && this.$route.query.action === 'register') {
+      if (this.$route.path === '/register' && this.$route.query.action === 'register') {
         this.isFlipped = true;
       } else {
         this.isFlipped = false;
       }
     }
   },
-
 };
 </script>
 
 <style scoped>
- 
-  
-  .valid {
-    color: green;
-  }
-  
-  .invalid {
-    color: red;
-  }
+.validation-tooltip {
+  position: relative;
+  color: red;
+  display: inline-block;
+  margin-right: 10px;
+}
+.validation-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  background-color: #f9d5d5;
+  color: #d9534f;
+  padding: 5px;
+  border-radius: 4px;
+  top: -30px;
+  left: 0;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.validation-tooltip:hover::after {
+  opacity: 1;
+}
 
-/* 验证图标和文字 */
 .validation-icons {
   display: flex;
   flex-direction: column;
@@ -219,13 +245,14 @@ export default {
 }
 
 .password-strength {
+  width: 100%;
   font-size: 1.2em;
   color: #ff6347;
   font-weight: bold;
   margin-top: 10px;
   text-align: center;
 }
-  /* 外部容器，确保整个页面居中 */
+
 .login-register-page {
   display: flex;
   justify-content: center;
@@ -234,57 +261,46 @@ export default {
   background: rgb(85,123,235);
   background: linear-gradient(135deg, rgba(85,123,235,0.85) 7%, rgba(240,175,122,1) 30%, rgba(217,240,247,0.5259) 80%);
 }
-  
-  /* 卡片容器 */
+
 .card-container {
   width: 400px;
-  height: auto;
+  height: 500px;
   position: relative;
   perspective: 1000px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-  
-  .login-card{
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    backface-visibility: hidden;
-    transition: transform 0.6s ease; /* 将过渡效果应用在卡片上 */
 
-  }
-  .register-card {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    backface-visibility: hidden;
-    transition: transform 0.6s ease; /* 将过渡效果应用在卡片上 */
+.login-card, .register-card {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  backface-visibility: hidden;
+  transition: transform 0.6s ease;
+}
 
-  }
-  
-  .login-card {
-    transform: rotateY(0deg);
-  }
-  
-  .register-card {
-    transform: rotateY(180deg);
-  }
-  
-  .flipped .login-card {
-    transform: rotateY(-180deg);
-  }
-  
-  .flipped .register-card {
-    transform: rotateY(0deg);
-  }
-  
-  /* 表单卡片样式 */
+.login-card {
+  transform: rotateY(0deg);
+}
+
+.register-card {
+  transform: rotateY(180deg);
+}
+
+.flipped .login-card {
+  transform: rotateY(-180deg);
+}
+
+.flipped .register-card {
+  transform: rotateY(0deg);
+}
+
 .form-card {
   padding: 20px;
   border-radius: 15px;
   background: rgb(85,123,235);
-  background: linear-gradient(153deg, rgba(85,123,235,0.8) 0%, rgba(66,207,168,0.5) 67%, rgba(217,240,247,0.7259) 100%);
+  background: linear-gradient(153deg, rgba(85,123,235,0.93) 0%, rgba(66,207,168,0.9) 67%, rgba(217,240,247,0.83) 100%);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   width: 80%;
   max-width: 350px;
@@ -292,20 +308,20 @@ export default {
   flex-direction: column;
   align-items: center;
 }
-  .form-card h2 {
+
+.form-card h2 {
   font-size: 24px;
   font-weight: bold;
-  color: #000000b6; /* 确保标题颜色醒目 */
-  /* 使用楷体 */
+  color: #000000b6;
   font-family: 'KaiTi', sans-serif;
   font-size: 2.34em;
   text-align: center;
   margin-bottom: 20px;
-  text-shadow: 0 3px 5px rgb(255, 255, 255); /* 增强阴影效果 */
+  text-shadow: 0 3px 5px rgb(255, 255, 255);
 }
+
 .el-input {
-  margin-bottom: 15px;
-  
+  margin-bottom: 3%;
 }
 
 .el-button {
@@ -313,7 +329,7 @@ export default {
 }
 
 .el-button--primary {
-  background-color: #5583eb; /* 提高对比度 */
+  background-color: #5583eb;
   border-color: #5583eb;
   color: #fff;
 }
@@ -322,12 +338,10 @@ export default {
   color: #345bf5;
   font-weight: bold;
   font-size: 1.34em;
-  text-shadow: 0 3px 5px rgb(255, 0, 0); /* 增强阴影效果 */
+  text-shadow: 0 3px 5px rgb(255, 0, 0);
 }
 
-  .waimiancard {
-  /* width: 100%;
-  height: 100%; */
+.waimiancard {
   padding: 7%;
   border-radius: 15px;
   background-image: url('https://i.postimg.cc/fbG8ZRj6/DALL-E-2024-10-27-00-32-12-A-cute-and-colorful-cartoon-banner-illustration-themed-around-Poop-Bat.webp');
@@ -339,5 +353,13 @@ export default {
   justify-content: center;
   align-items: center;
 }
-  </style>
-  
+
+.valid {
+  color: green;
+  display: none;
+}
+
+.invalid {
+  color: red;
+}
+</style>
