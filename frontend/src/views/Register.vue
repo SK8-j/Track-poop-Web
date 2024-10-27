@@ -23,6 +23,7 @@
   <script>
   import axios from 'axios';
   import { useRouter } from 'vue-router';
+  import { showMessage } from '../utils/message';
   
   export default {
     name: 'RegisterPage', // 修改为多词名称
@@ -43,10 +44,10 @@
       async handleRegister() {
         try {
           const response = await axios.post('http://localhost:5000/register', this.registerForm);
-          alert(response.data.message);
+          showMessage(response.data.message);
           this.router.push('/login');
         } catch (error) {
-          alert('注册失败，请重试!');
+          showMessage('注册失败，请重试!');
         }
       },
       flipToLogin() {

@@ -46,7 +46,8 @@
   
   <script>
   import axios from 'axios';
-  
+  import { showMessage } from '../utils/message'; // 导入自定义的消息方法
+
   export default {
     name: 'LoginRegisterContainer',
     data() {
@@ -72,23 +73,43 @@
     },
     methods: {
       async handleLogin() {
-        try {
-          const response = await axios.post('http://localhost:5000/login', this.loginForm, { withCredentials: true });
-          alert(response.data.message);
-          this.$router.push('/');
-        } catch (error) {
-          alert('登录失败，请检查用户名和密码');
+      try {
+        const response = await axios.post('http://localhost:5000/login', this.loginForm, {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        showMessage(response.data.message+'，'+response.data.username, 'success');
+        this.$router.push('/');
+      } catch (error) {
+        console.error('Login error:', error);
+        if (error.response && error.response.data && error.response.data.message) {
+          showMessage(error.response.data.message);
+        } else {
+          showMessage('登录失败，请检查用户名和密码');
         }
-      },
-      async handleRegister() {
-        try {
-          const response = await axios.post('http://localhost:5000/register', this.registerForm, { withCredentials: true });
-          alert(response.data.message);
-          this.$router.push('/login');
-        } catch (error) {
-          alert('注册失败，请重试');
+      }
+    },
+    async handleRegister() {
+      try {
+        const response = await axios.post('http://localhost:5000/register', this.registerForm, {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        showMessage(response.data.message, 'success');
+        this.$router.push('/login');
+      } catch (error) {
+        console.error('Register error:', error);
+        if (error.response && error.response.data && error.response.data.message) {
+          showMessage(error.response.data.message);
+        } else {
+          showMessage('注册失败，请重试');
         }
-      },
+      }
+    },
       flipToRegister() {
         this.isFlipped = true;
       },
@@ -161,10 +182,13 @@
   .form-card h2 {
   font-size: 24px;
   font-weight: bold;
-  color: #f88513; /* 确保标题颜色醒目 */
+  color: #000000b6; /* 确保标题颜色醒目 */
+  /* 使用楷体 */
+  font-family: 'KaiTi', sans-serif;
+  font-size: 2.34em;
   text-align: center;
   margin-bottom: 20px;
-  text-shadow: 0 3px 30px rgb(255, 255, 255); /* 增强阴影效果 */
+  text-shadow: 0 3px 5px rgb(255, 255, 255); /* 增强阴影效果 */
 }
 .el-input {
   margin-bottom: 15px;
@@ -182,12 +206,16 @@
 }
 
 .el-button--text {
-  color: #5583eb;
+  color: #345bf5;
+  font-weight: bold;
+  font-size: 1.34em;
+  text-shadow: 0 3px 5px rgb(255, 0, 0); /* 增强阴影效果 */
 }
 
   .waimiancard {
-  width: 100%;
-  height: 100%;
+  /* width: 100%;
+  height: 100%; */
+  padding: 7%;
   border-radius: 15px;
   background-image: url('https://i.postimg.cc/fbG8ZRj6/DALL-E-2024-10-27-00-32-12-A-cute-and-colorful-cartoon-banner-illustration-themed-around-Poop-Bat.webp');
   background-size: cover;

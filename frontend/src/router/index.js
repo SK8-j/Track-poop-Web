@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 // import Register from '../views/Register.vue';
 import HomePage from '../views/HomePage.vue';
 import LoginRegisterContainer from '../views/LoginRegisterContainer.vue';
+import ProfilePage from '@/views/ProfilePage.vue';
 
 const routes = [
   {
@@ -21,6 +22,11 @@ const routes = [
     name: 'Register',
     component: LoginRegisterContainer,
     meta: { requiresAuth: false }, // 不需要登录
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: ProfilePage,
   },
 ];
 

@@ -16,7 +16,9 @@
           <el-button type="success" @click="recordPoop(1)">1 💩</el-button>
           <el-button type="warning" @click="recordPoop(2)">2 💩</el-button>
         </div>
-  
+        <!-- 放点好玩的 -->
+         <div class="oldprojector">
+        <OldFilmProjector /></div>
         <!-- 用户信息区域 -->
       <el-card class="user-card" shadow="hover">
         <div class="user-info">
@@ -33,11 +35,14 @@
   <script>
 import NavBar from '../components/NavBar.vue';
 import axios from 'axios';
+import { showMessage } from '../utils/message';
+import OldFilmProjector from '../components/OldFilmProjector.vue';
 
 export default {
   name: 'HomePage',
   components: {
     NavBar,
+    OldFilmProjector
   },
   data() {
     return {
@@ -57,7 +62,7 @@ export default {
         this.userInfo = response.data;
       } catch (error) {
         console.error('Error fetching user info:', error);
-        alert('无法加载用户信息，请重新登录');
+        showMessage('无法加载用户信息，请重新登录');
         this.$router.push('/login');
       }
     },
@@ -66,22 +71,22 @@ export default {
         const response = await axios.post('http://localhost:5000/record_poop', {
           poop_count: count
         }, { withCredentials: true });
-        alert(response.data.message);
+        showMessage(response.data.message);
         // 重新获取用户信息以更新💩数
         this.fetchUserInfo();
       } catch (error) {
         console.error(error);
-        alert('Error recording poop count!');
+        showMessage('Error recording poop count!');
       }
     },
     async logout() {
       try {
         const response = await axios.post('http://localhost:5000/logout', {}, { withCredentials: true });
-        alert(response.data.message);
+        showMessage(response.data.message, 'success');
         this.$router.push('/login');
       } catch (error) {
         console.error(error);
-        alert('Error logging out!');
+        showMessage('Error logging out!');
       }
     }
   }
@@ -120,11 +125,11 @@ export default {
   
   .poop-battle {
     text-align: center;
-    margin: 30px 0;
+    margin: 15px 0;
     padding: 20px;
     background-color: #fff;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     width: 100%;
     max-width: 600px;
   }
@@ -169,6 +174,14 @@ export default {
 .logout-button {
   margin-top: 10px;
   font-size: 14px;
+}
+.oldprojector {
+    width: auto; /* 自适应宽度 */
+    height: auto; /* 自适应高度 */
+    left: 9%; /* 水平居中 */
+    top: 72%; /* 垂直居中 */
+    position: absolute; 
+    transform: scale(0.35); /* 缩小投影机的大小 */
 }
 </style>
   

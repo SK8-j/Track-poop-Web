@@ -23,6 +23,7 @@
   <script>
   import axios from 'axios';
   import { useRouter } from 'vue-router';
+  import { showMessage } from '../utils/message';
   
   export default {
     name: 'LoginPage', // 使用多词名称
@@ -46,14 +47,14 @@
           const userId = response.data.user_id; 
           if (userId) {
               localStorage.setItem('user_id', userId); // 将用户ID存储到localStorage中
-              alert(response.data.message);
+              showMessage(response.data.message);
           // 登录成功后跳转到首页
             this.$router.push('/');
         } else {
-            alert('Login failed: user ID not received.');
+            showMessage('Login failed: user ID not received.');
             }
         } catch (error) {
-            alert('Invalid credentials');
+            showMessage('Invalid credentials');
         }
       },
       flipToRegister() {

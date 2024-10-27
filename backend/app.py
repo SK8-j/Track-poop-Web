@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
+from sqlalchemy.orm import sessionmaker
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -28,7 +29,7 @@ def register():
     new_user = User(username=username, password=hashed_password)
     db.session.add(new_user)
     db.session.commit()
-    return jsonify({'message': 'User registered successfully'}), 201
+    return jsonify({'message': '注册成功!欢迎来到Poop Battle！'}), 201
 
 # 登录API
 @app.route('/login', methods=['POST'])
@@ -39,26 +40,28 @@ def login():
     user = User.query.filter_by(username=username).first()
     if user and bcrypt.check_password_hash(user.password, password):
         session['user_id'] = user.id
-        return jsonify({'message': 'Logged in successfully','user_id':session['user_id']}), 200
+        return jsonify({'message': '欢迎回来','username':username}), 200
     return jsonify({'message': 'Invalid credentials'}), 401
 
 # 注销API
 @app.route('/logout', methods=['POST'])
 def logout():
     session.pop('user_id', None)
-    return jsonify({'message': 'Logged out successfully'}), 200
+    return jsonify({'message': '会想你的！'}), 200
 
 # 修改昵称API
-@app.route('/update_username', methods=['PUT'])
-def update_username():
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
     if 'user_id' not in session:
         return jsonify({'message': 'Unauthorized'}), 401
     data = request.get_json()
     new_username = data.get('new_username')
-    user = User.query.get(session['user_id'])
-    user.username = new_username
-    db.session.commit()
-    return jsonify({'message': 'Username updated successfully'}), 200
+    user = db.session.get(User, session['user_id'])
+    if user:
+        user.username = new_username
+        db.session.commit()
+        return jsonify({'message': '换名字啦！'}), 200
+    return jsonify({'message': 'User not found'}), 404
 
 # 记录💩数API
 @app.route('/record_poop', methods=['POST'])
@@ -78,7 +81,7 @@ def get_user_info():
     if 'user_id' not in session:
         return jsonify({'message': 'Unauthorized'}), 401
 
-    user = User.query.get(session['user_id'])
+    user = db.session.get(User, session['user_id'])
     if user:
         return jsonify({
             'username': user.username,
