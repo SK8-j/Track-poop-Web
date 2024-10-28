@@ -7,7 +7,7 @@ import ProfilePage from '@/views/ProfilePage.vue';
 
 const routes = [
   {
-    path: '/home',
+    path: '/',
     name: 'Home',
     component: HomePage,
   },
@@ -17,12 +17,12 @@ const routes = [
     component: LoginRegisterContainer,
     meta: { requiresAuth: false }, // 不需要登录
   },
-  {
-    path: '/register',
-    name: 'Register',
-    component: LoginRegisterContainer,
-    meta: { requiresAuth: false }, // 不需要登录
-  },
+  // {
+  //   path: '/register',
+  //   name: 'Register',
+  //   component: LoginRegisterContainer,
+  //   meta: { requiresAuth: false }, // 不需要登录
+  // },
   {
     path: '/profile',
     name: 'Profile',
