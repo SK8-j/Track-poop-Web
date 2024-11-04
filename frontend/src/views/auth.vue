@@ -11,7 +11,7 @@
                 <el-input v-model="loginForm.username" placeholder="用户名"></el-input>
               </el-form-item>
               <el-form-item>
-                <el-input type="password" v-model="loginForm.password" placeholder="密码"></el-input>
+                <el-input type="password" v-model="loginForm.password" placeholder="密码" @keyup.enter="handleLogin"></el-input>
               </el-form-item>
               <el-form-item>
                 <el-button type="primary" @click="handleLogin">登录</el-button>
@@ -35,6 +35,9 @@
                   placeholder="请输入用户名" >
                 </el-input>
               </el-form-item>
+              <el-form-item label="初始💩数量" prop="field105">
+                <el-slider :max='30' :step='1' v-model="registerForm.poop_count"></el-slider>
+              </el-form-item>
               <el-form-item label="密码">
                 <el-input
                   type="password"
@@ -42,10 +45,8 @@
                   clearable
                   placeholder="请输入密码"
                   show-password
+                  @keyup.enter="handleRegister"
                 ></el-input>
-              </el-form-item>
-              <el-form-item label="初始💩数量" prop="field105">
-                <el-slider :max='30' :step='1' v-model="registerForm.poop_count"></el-slider>
               </el-form-item>
                 
               <!-- Password Strength Indicator -->
@@ -132,6 +133,9 @@ export default {
     }
   },
   methods: {
+    // 监听回车事件 点击提交button
+
+
     // Validate the password and update validationStatus
     validatePassword() {
       const password = this.registerForm.password;
@@ -153,7 +157,7 @@ export default {
         if (userId) {
           showMessage(`${response.data.message}，${response.data.username}`, 'success');
           localStorage.setItem('user_id', userId);
-          this.router.push('/home');
+          this.router.push('/');
         } else {
           showMessage('登录失败：未收到用户ID。');
         }
@@ -202,7 +206,7 @@ export default {
     },
     // Check the current route to determine if the Register card should be shown
     checkRoute() {
-      if (this.$route.path === '/register' && this.$route.query.action === 'register') {
+      if (this.$route.query.action === 'register') {
         this.isFlipped = true;
       } else {
         this.isFlipped = false;
