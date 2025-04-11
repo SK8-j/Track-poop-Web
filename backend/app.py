@@ -84,6 +84,22 @@ def record_poop():
     poop_count = data.get('poop_count')
     user = User.query.get(session['user_id'])
 
+# 处理撤回操作
+    if poop_count == -1:  # 约定poop_count为-1时表示撤回上一次记录
+        today = datetime.utcnow().date()
+        last_record = PoopRecord.query.filter(
+            PoopRecord.user_id == user.id,
+            db.func.date(PoopRecord.timestamp) == today
+        ).order_by(PoopRecord.timestamp.desc()).first()
+        if last_record:
+            user.poops -= last_record.count
+            user.monthly_poops -= last_record.count
+            db.session.delete(last_record)
+            db.session.commit()
+            return jsonify({'message': '上一次记录已撤回'}), 200
+        else:
+            return jsonify({'message': '今天没有可撤回的记录'}), 400
+
     # 检查5分钟内的限制
     five_minutes_ago = datetime.utcnow() - timedelta(minutes=5)
     recent_records = PoopRecord.query.filter(
@@ -131,6 +147,24 @@ def leaderboard():
     ]
     return jsonify(leaderboard_data), 200
 
+#获取用户的所有历史poop记录API
+@app.route('/poop_history', methods=['GET'])
+def poop_history():
+    if 'user_id' not in session:
+        return jsonify({'message': 'Unauthorized'}), 401
+
+    user = db.session.get(User, session['user_id'])
+    if user:
+        records = PoopRecord.query.filter_by(user_id=user.id).order_by(PoopRecord.timestamp.desc()).all()
+        history = [
+            {
+                'count': record.count,
+                'timestamp': record.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            }
+            for record in records
+        ]
+        return jsonify(history), 200
+    return jsonify({'message': 'User not found'}), 404
 
 
 # 首页获取用户信息和poop数API

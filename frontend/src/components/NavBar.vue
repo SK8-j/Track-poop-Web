@@ -3,7 +3,7 @@
       <div class="logo">💩💩大作战</div>
       <div class="nav">
         <el-button type="text" @click="goTo('home')">首页</el-button>
-        <el-button type="text" @click="goTo('record')">记录💩数</el-button>
+        <el-button type="text" @click="goTo('poophistory')">记录💩数</el-button>
         <el-button type="text" @click="goTo('profile')">个人中心</el-button>
       </div>
     </el-header>
@@ -20,8 +20,8 @@
       const goTo = (routeName) => {
         if (routeName === 'home') {
           router.push('/');
-        } else if (routeName === 'record') {
-          router.push('/record');
+        } else if (routeName === 'poophistory') {
+          router.push('/poophistory');
         } else if (routeName === 'profile') {
           router.push('/profile');
         }

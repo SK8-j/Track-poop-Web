@@ -4,6 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from '../views/HomePage.vue';
 import LoginRegisterContainer from '../views/auth.vue';
 import ProfilePage from '@/views/ProfilePage.vue';
+import poopHistoryPage from '@/views/poopHistory.vue';
 
 const routes = [
   {
@@ -27,6 +28,11 @@ const routes = [
     path: '/profile',
     name: 'Profile',
     component: ProfilePage,
+  },
+  {
+    path: '/poophistory',
+    name: 'poophistory',
+    component: poopHistoryPage,
   },
 ];
 

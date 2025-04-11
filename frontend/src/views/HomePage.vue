@@ -16,6 +16,7 @@
           <el-button type="primary" @click="recordPoop(0)">0 💩</el-button>
           <el-button type="success" @click="recordPoop(1)">1 💩</el-button>
           <el-button type="warning" @click="recordPoop(2)">2 💩</el-button>
+          <el-button type="info" @click="confirmUndo">撤回上一次记录</el-button>
         </div>
 
         <!-- 用户信息区域 -->
@@ -96,6 +97,12 @@ export default {
         showMessage('Error logging out!');
       }
     },
+    confirmUndo() {
+      const isConfirmed = confirm('确定要撤回上一次的记录吗？此操作只能撤回当天的记录。');
+      if (isConfirmed) {
+        this.recordPoop(-1);
+      }
+    }
   }
 };
 </script>

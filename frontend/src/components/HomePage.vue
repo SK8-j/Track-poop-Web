@@ -11,7 +11,7 @@
 import axios from 'axios';
 
 export default {
-  name: 'HomePage',  // 修改为多词名称
+  name: 'HomePagetest',  // 修改为多词名称
   methods: {
     async recordPoop(count) {
       try {
