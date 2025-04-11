@@ -27,13 +27,14 @@
             <el-button type="danger" @click="logout" class="logout-button">注销</el-button>
           </div>
         </el-card>
-        <el-button type="info" @click="showLeaderboard">查看排行榜</el-button>
       </el-main>
 
       <!-- 排行榜区域 -->
       <div class="leaderboard-fixed">
         <LeaderboardPage />
       </div>
+
+      
     </div>
   </div>
 </template>
@@ -95,17 +96,6 @@ export default {
         showMessage('Error logging out!');
       }
     },
-    async showLeaderboard() {
-      try {
-        const response = await axios.get('http://localhost:5000/leaderboard', { withCredentials: true });
-        const leaderboardData = response.data;
-        // 可以在这里显示排行榜数据，例如使用弹窗
-        alert(JSON.stringify(leaderboardData, null, 2));
-      } catch (error) {
-        console.error(error);
-        showMessage('Error fetching leaderboard!');
-      }
-    }
   }
 };
 </script>
@@ -215,12 +205,25 @@ export default {
 }
 
 .leaderboard-fixed {
-  width: 100%;
-  margin-top: 20px;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 300px;
   padding: 20px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+@media (max-width: 768px) {
+  .leaderboard-fixed {
+    position: static;
+    width: 100%;
+    margin-top: 20px;
+    right: 0;
+    top: 0;
+  }
 }
 
 /* 媒体查询，当屏幕宽度小于 768px 时应用以下样式（适用于大多数移动设备） */
@@ -231,13 +234,6 @@ export default {
 
  .main-content {
     width: 100%;
-  }
-
- .leaderboard-fixed {
-    width: 100%;
-    position: relative;
-    top: 0;
-    right: 0;
   }
 }
 </style>

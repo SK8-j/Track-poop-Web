@@ -119,7 +119,7 @@ def record_poop():
 @app.route('/leaderboard', methods=['GET'])
 def leaderboard():
     current_month = datetime.utcnow().month
-    users = User.query.filter(
+    users = db.session.query(User).join(PoopRecord, User.id == PoopRecord.user_id).filter(
         db.extract('month', PoopRecord.timestamp) == current_month
     ).order_by(User.monthly_poops.desc()).all()
     leaderboard_data = [
