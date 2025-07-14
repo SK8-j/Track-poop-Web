@@ -18,12 +18,6 @@ const routes = [
     component: LoginRegisterContainer,
     meta: { requiresAuth: false }, // 不需要登录
   },
-  // {
-  //   path: '/register',
-  //   name: 'Register',
-  //   component: LoginRegisterContainer,
-  //   meta: { requiresAuth: false }, // 不需要登录
-  // },
   {
     path: '/profile',
     name: 'Profile',
@@ -50,5 +44,3 @@ router.beforeEach((to, from, next) => {
     next();
   }
 });
-
-
